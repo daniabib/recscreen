@@ -31,10 +31,10 @@ def capture_screen(fps: float = 1) -> None:
                 image = compress_image(screenshot, size=(1280, 720))
                 # image = compress_image(screenshot)
                 image.save(f"screenshot-{timestamp}.png")
-                print("Screens captured: ", end='')
-                print(n_screens, end='', flush=True)
+                print(f"Screens captured: {n_screens}", end='\r')
                 n_screens += 1
                 time.sleep(1/fps)
+                
         except KeyboardInterrupt:
             print("\nEnding screen print.")
             sct.close()

@@ -1,5 +1,6 @@
 import time
 from datetime import datetime
+import os
 
 from PIL import Image
 
@@ -15,13 +16,16 @@ def compress_image(mss_image: ScreenShot, size: tuple[int, int] = None) -> Image
     # image = image.convert("P", palette=Image.Palette.ADAPTIVE, colors=256)
     return image
 
+def print_size_mb(size: int) -> None:
+    print(f"Total size: {round(size / (1024 * 1024), 3)} MB", end='\r')
 
 def capture_screen(fps: float = 1) -> None:
     with mss() as sct:
         sct.compression_level = 7
         # monitor = {"top": 0, "left": 0, "width": 1920, "height": 1080}
         monitor = sct.monitors[1]
-        n_screens = 0
+        n_screens: int = 0
+        total_screens_size: int = 0
         try:
             while "Screen Capturing":
                 timestamp = datetime.now().strftime("%Y%m%d_%H-%M-%S")
@@ -30,9 +34,13 @@ def capture_screen(fps: float = 1) -> None:
 
                 image = compress_image(screenshot, size=(1280, 720))
                 # image = compress_image(screenshot)
-                image.save(f"screenshots/screenshot-{timestamp}.png")
-                print(f"Screens captured: {n_screens}", end='\r')
+                file_path = f"screenshots/screenshot-{timestamp}.png"
+                image.save(file_path)
+                # print(f"Screens captured: {n_screens}", end='\r')
                 n_screens += 1
+
+                total_screens_size += os.path.getsize(f'./{file_path}')
+                print_size_mb(total_screens_size)
                 time.sleep(1/fps)
                 
         except KeyboardInterrupt:

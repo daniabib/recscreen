@@ -10,7 +10,8 @@ import typer
 
 
 def print_size_mb(size: int) -> None:
-    print(f"Total size: {round(size / (1024 * 1024), 3)} MB", end='\r')
+    # print(f"Total size: {round(size / (1024 * 1024), 3)} MB", end='\r')
+    typer.echo(f" Total size: {round(size / (1024 * 1024), 3)} MB\r", nl=False)
 
 
 def resize_image(mss_image: ScreenShot, size: tuple[int, int] = None) -> Image:

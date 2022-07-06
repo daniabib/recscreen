@@ -1,40 +1,50 @@
 import time
 from datetime import datetime
 import os
+from typing import Optional
 
 from PIL import Image
-
 from mss.linux import MSS as mss
 from mss.screenshot import ScreenShot
+import typer
 
-
-def compress_image(mss_image: ScreenShot, size: tuple[int, int] = None) -> Image:
-    image = Image.frombytes("RGB", mss_image.size,
-                            mss_image.bgra, "raw", "BGRX")
-    if size:
-        image = image.resize(size, resample=Image.Resampling.LANCZOS)
-    # image = image.convert("P", palette=Image.Palette.ADAPTIVE, colors=256)
-    return image
 
 def print_size_mb(size: int) -> None:
     print(f"Total size: {round(size / (1024 * 1024), 3)} MB", end='\r')
 
-def capture_screen(fps: float = 1) -> None:
+
+def resize_image(mss_image: ScreenShot, size: tuple[int, int] = None) -> Image:
+    image = Image.frombytes("RGB", mss_image.size,
+                            mss_image.bgra, "raw", "BGRX")
+    if size:
+        image = image.resize(size, resample=Image.Resampling.LANCZOS)
+    return image
+
+
+def main(output: Optional[str] = typer.Argument(None),
+         fps: float = 1,
+         size: str = "960x540"):
+
     with mss() as sct:
         sct.compression_level = 7
         # monitor = {"top": 0, "left": 0, "width": 1920, "height": 1080}
         monitor = sct.monitors[1]
         n_screens: int = 0
         total_screens_size: int = 0
+
         try:
             while "Screen Capturing":
                 timestamp = datetime.now().strftime("%Y%m%d_%H-%M-%S")
 
                 screenshot = sct.grab(monitor)
 
-                image = compress_image(screenshot, size=(1280, 720))
-                # image = compress_image(screenshot)
-                file_path = f"screenshots/screenshot-{timestamp}.png"
+                image = resize_image(screenshot, size=(1280, 720))
+                if output:
+                    os.makedirs(output, exist_ok=True)
+                    file_path = f"{output}/screenshot-{timestamp}.png"
+                else:
+                    file_path = f"screenshots/screenshot-{timestamp}.png"
+                
                 image.save(file_path)
                 # print(f"Screens captured: {n_screens}", end='\r')
                 n_screens += 1
@@ -42,11 +52,12 @@ def capture_screen(fps: float = 1) -> None:
                 total_screens_size += os.path.getsize(f'./{file_path}')
                 print_size_mb(total_screens_size)
                 time.sleep(1/fps)
-                
+
         except KeyboardInterrupt:
             print("\nEnding screen print.")
             sct.close()
             print("Bye!")
 
-if __name__ == "__main__":
-    capture_screen()
+
+if __name__ == '__main__':
+    typer.run(main)

@@ -17,14 +17,13 @@ def print_size_mb(size: int) -> None:
 def resize_image(mss_image: ScreenShot, size: tuple[int, int] = None) -> Image:
     image = Image.frombytes("RGB", mss_image.size,
                             mss_image.bgra, "raw", "BGRX")
-    if size:
-        image = image.resize(size, resample=Image.Resampling.LANCZOS)
+    image = image.resize(size, resample=Image.Resampling.LANCZOS)
     return image
 
 
 def main(output: Optional[str] = typer.Argument(None),
          fps: float = 1,
-         size: str = "960x540"):
+         size: str = typer.Option("1280x720", help="Output image size in format: WIDTHxHEIGHT")):
 
     with mss() as sct:
         sct.compression_level = 7
@@ -38,14 +37,14 @@ def main(output: Optional[str] = typer.Argument(None),
                 timestamp = datetime.now().strftime("%Y%m%d_%H-%M-%S")
 
                 screenshot = sct.grab(monitor)
-
-                image = resize_image(screenshot, size=(1280, 720))
+                width, height = [int(x) for x in size.split("x")]
+                image = resize_image(screenshot, size=(width, height))
                 if output:
                     os.makedirs(output, exist_ok=True)
                     file_path = f"{output}/screenshot-{timestamp}.png"
                 else:
                     file_path = f"screenshots/screenshot-{timestamp}.png"
-                
+
                 image.save(file_path)
                 # print(f"Screens captured: {n_screens}", end='\r')
                 n_screens += 1

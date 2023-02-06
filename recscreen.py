@@ -4,7 +4,8 @@ import os
 from typing import Optional
 
 from PIL import Image
-from mss.linux import MSS as mss
+# from mss.linux import MSS as mss
+from mss import mss
 from mss.screenshot import ScreenShot
 import typer
 

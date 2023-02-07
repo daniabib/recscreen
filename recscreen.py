@@ -21,10 +21,19 @@ def resize_image(mss_image: ScreenShot, size: tuple[int, int] = None) -> Image:
     image = image.resize(size, resample=Image.Resampling.LANCZOS)
     return image
 
+def get_monitors_list():
+    return mss().monitors
 
-def main(output: Optional[str] = typer.Argument(None),
-         fps: float = 1,
-         size: str = typer.Option("1280x720", help="Output image size in format: WIDTHxHEIGHT")):
+
+def main(output: str = typer.Option(None, "--output", "-o", help="Specify a folder to output images."),
+        #  fps: float = 1,
+         size: str = typer.Option("1280x720", help="Output image size in format: WIDTHxHEIGHT."),
+         monitor: float = 1,
+         get_monitors : bool = typer.Option(None)):
+    
+    if get_monitors:
+        print(get_monitors_list())
+        raise typer.Exit()
 
     with mss() as sct:
         sct.compression_level = 7
